@@ -1,0 +1,1056 @@
+--[[
+    ================================================================
+    [ SCRIPT INFORMATION ]
+    Project: Custom Script
+    Author: OYB
+    YouTube: https://www.youtube.com/channel/UCAlXXV1Hbvf7WbfXARuVtiQ
+    
+    [ TERMS AND CONDITIONS ]
+    - You ARE allowed to use and modify this script for your own games.
+    - You ARE NOT allowed to re-upload, redistribute, or claim 
+      ownership of this script.
+    - Removing or altering these credits is strictly prohibited.
+    
+    Copyright (c) 2026 OYB. All rights reserved.
+    ================================================================
+]]
+
+-- ⚠️ IMPORTANT: Put this code at the VERY TOP of your Main Script (before obfuscating) ⚠️
+
+local ProtectionConfig = {
+    -- 🔴 CRITICAL: This MUST exactly match the 'Secret' value in your Key System's Config!
+    -- If your Key System has: Secret = "Test"
+    -- Then this must also be: SecretKey = "Test"
+    SecretKey = "2107",
+    
+    -- The name of your Hub (shown in the kick message if they try to bypass)
+    HubName = "NNVN HUB"
+}
+
+-- Anti-Bypass Logic: Checks if the Key System successfully set the global variable
+if not _G[ProtectionConfig.SecretKey] then
+    local player = game:GetService("Players").LocalPlayer
+    if player then
+        player:Kick("\n🛡️ Unauthorized Execution 🛡️\n\nPlease use the official Key System to run " .. ProtectionConfig.HubName)
+    end
+    return -- Stops the rest of the script from loading!
+end
+
+-------------------------------------------------------------------------------
+-- 👇 YOUR MAIN SCRIPT CODE STARTS HERE 👇
+-------------------------------------------------------------------------------
+--[[
+    SCRIPT NNVN HUB - Hide From The Villain
+    - PHE VILLAIN: MÀU ĐỎ + AIMBOT
+    - PHE SURVIVORS: MÀU XANH + AIMBOT
+    - PHE LOBBY: MÀU XÁM
+    - TELEPORT CRATE
+--]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- ===== CÀI ĐẶT =====
+local settings = {
+    espVillain = true,
+    espSurvivors = true,
+    espLobby = false,
+    aimbotVillain = true,
+    aimbotSurvivors = false,
+    aimbotSmoothness = 0.3,
+    currentTab = "Main",
+    menuOpen = true
+}
+
+-- ===== TẠO MENU =====
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NNVNHub"
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ===== LOGO NN TRÊN MÀN HÌNH =====
+local logoFrame = Instance.new("Frame")
+logoFrame.Name = "LogoFrame"
+logoFrame.Size = UDim2.new(0, 60, 0, 60)
+logoFrame.Position = UDim2.new(0, 15, 1, -75)
+logoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+logoFrame.BackgroundTransparency = 0.1
+logoFrame.BorderSizePixel = 0
+logoFrame.Parent = screenGui
+
+-- Logo Corner
+local logoCorner = Instance.new("UICorner")
+logoCorner.CornerRadius = UDim.new(0, 15)
+logoCorner.Parent = logoFrame
+
+-- Logo Stroke
+local logoStroke = Instance.new("UIStroke")
+logoStroke.Color = Color3.fromRGB(150, 100, 255)
+logoStroke.Transparency = 0.3
+logoStroke.Thickness = 2
+logoStroke.Parent = logoFrame
+
+-- Glow Effect
+local logoGlow = Instance.new("Frame")
+logoGlow.Size = UDim2.new(1.3, 0, 1.3, 0)
+logoGlow.Position = UDim2.new(-0.15, 0, -0.15, 0)
+logoGlow.BackgroundColor3 = Color3.fromRGB(150, 100, 255)
+logoGlow.BackgroundTransparency = 0.95
+logoGlow.BorderSizePixel = 0
+logoGlow.Parent = logoFrame
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 20)
+glowCorner.Parent = logoGlow
+
+-- Logo Text
+local logoText = Instance.new("TextLabel")
+logoText.Size = UDim2.new(1, 0, 1, 0)
+logoText.Position = UDim2.new(0, 0, 0, 0)
+logoText.BackgroundTransparency = 1
+logoText.Text = "NN"
+logoText.TextColor3 = Color3.fromRGB(200, 180, 255)
+logoText.TextSize = 24
+logoText.Font = Enum.Font.GothamBold
+logoText.TextXAlignment = Enum.TextXAlignment.Center
+logoText.TextYAlignment = Enum.TextYAlignment.Center
+logoText.Parent = logoFrame
+
+-- Logo Button (click to toggle)
+local logoBtn = Instance.new("TextButton")
+logoBtn.Size = UDim2.new(1, 0, 1, 0)
+logoBtn.Position = UDim2.new(0, 0, 0, 0)
+logoBtn.BackgroundTransparency = 1
+logoBtn.Text = ""
+logoBtn.Parent = logoFrame
+
+-- Pulse Animation cho logo
+local function pulseLogo()
+    local pulseInfo = TweenInfo.new(
+        1.5,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut,
+        -1,
+        true
+    )
+    local glowTween = TweenService:Create(logoGlow, pulseInfo, {
+        BackgroundTransparency = 0.85
+    })
+    glowTween:Play()
+end
+pulseLogo()
+
+-- ===== MAIN CONTAINER =====
+local mainContainer = Instance.new("Frame")
+mainContainer.Name = "MainContainer"
+mainContainer.Size = UDim2.new(0, 350, 0, 520)
+mainContainer.Position = UDim2.new(0.5, -175, 0.5, -260)
+mainContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainContainer.BackgroundTransparency = 0.05
+mainContainer.BorderSizePixel = 0
+mainContainer.ClipsDescendants = true
+mainContainer.Parent = screenGui
+
+-- Corner
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = mainContainer
+
+-- Stroke
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.1
+stroke.Thickness = 1
+stroke.Parent = mainContainer
+
+-- Header
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 50)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+header.BackgroundTransparency = 0.2
+header.BorderSizePixel = 0
+header.Parent = mainContainer
+
+local headerCorner = Instance.new("UICorner")
+headerCorner.CornerRadius = UDim.new(0, 10)
+headerCorner.Parent = header
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.7, 0, 1, 0)
+title.Position = UDim2.new(0, 15, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "NNVN Hub"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 18
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextYAlignment = Enum.TextYAlignment.Center
+title.Parent = header
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.7, 0, 1, 0)
+subtitle.Position = UDim2.new(0, 15, 0, 0)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "| Hide From The Villain"
+subtitle.TextColor3 = Color3.fromRGB(150, 150, 200)
+subtitle.TextSize = 12
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.TextYAlignment = Enum.TextYAlignment.Bottom
+subtitle.TextTransparency = 0.3
+subtitle.Parent = header
+
+-- Tab Buttons
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, 0, 0, 40)
+tabFrame.Position = UDim2.new(0, 0, 0, 50)
+tabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+tabFrame.BackgroundTransparency = 0.3
+tabFrame.BorderSizePixel = 0
+tabFrame.Parent = mainContainer
+
+-- Main Tab
+local mainTab = Instance.new("TextButton")
+mainTab.Size = UDim2.new(0.5, 0, 1, 0)
+mainTab.Position = UDim2.new(0, 0, 0, 0)
+mainTab.BackgroundTransparency = 1
+mainTab.BorderSizePixel = 0
+mainTab.Text = "Main"
+mainTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+mainTab.TextSize = 15
+mainTab.Font = Enum.Font.GothamSemibold
+mainTab.Parent = tabFrame
+
+-- Main Tab Indicator
+local mainIndicator = Instance.new("Frame")
+mainIndicator.Size = UDim2.new(0.5, 0, 0, 2)
+mainIndicator.Position = UDim2.new(0, 0, 1, -2)
+mainIndicator.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+mainIndicator.BorderSizePixel = 0
+mainIndicator.Parent = tabFrame
+
+-- Info Tab
+local infoTab = Instance.new("TextButton")
+infoTab.Size = UDim2.new(0.5, 0, 1, 0)
+infoTab.Position = UDim2.new(0.5, 0, 0, 0)
+infoTab.BackgroundTransparency = 1
+infoTab.BorderSizePixel = 0
+infoTab.Text = "Info"
+infoTab.TextColor3 = Color3.fromRGB(150, 150, 180)
+infoTab.TextSize = 15
+infoTab.Font = Enum.Font.GothamSemibold
+infoTab.Parent = tabFrame
+
+-- Info Tab Indicator
+local infoIndicator = Instance.new("Frame")
+infoIndicator.Size = UDim2.new(0.5, 0, 0, 2)
+infoIndicator.Position = UDim2.new(0.5, 0, 1, -2)
+infoIndicator.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+infoIndicator.BackgroundTransparency = 1
+infoIndicator.BorderSizePixel = 0
+infoIndicator.Parent = tabFrame
+
+-- Content Frame
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -100)
+contentFrame.Position = UDim2.new(0, 10, 0, 95)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainContainer
+
+-- Scroll Frame
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollFrame.Position = UDim2.new(0, 0, 0, 0)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.ScrollBarThickness = 3
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 120)
+scrollFrame.ScrollBarImageTransparency = 0.5
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 580)
+scrollFrame.Parent = contentFrame
+
+-- ===== DRAG HANDLE =====
+local dragHandle = Instance.new("Frame")
+dragHandle.Size = UDim2.new(1, 0, 0, 50)
+dragHandle.Position = UDim2.new(0, 0, 0, 0)
+dragHandle.BackgroundTransparency = 1
+dragHandle.Parent = mainContainer
+
+local dragging = false
+local dragStart, startPos
+
+dragHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainContainer.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+dragHandle.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+        local delta = input.Position - dragStart
+        mainContainer.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ===== UI FUNCTIONS =====
+local function createToggle(parent, text, yPos, default, desc)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(1, 0, 0, 60)
+    toggleFrame.Position = UDim2.new(0, 0, 0, yPos)
+    toggleFrame.BackgroundTransparency = 1
+    toggleFrame.Parent = parent
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -50, 0, 25)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(220, 220, 240)
+    label.TextSize = 14
+    label.Font = Enum.Font.GothamSemibold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = toggleFrame
+    
+    local descLabel = Instance.new("TextLabel")
+    descLabel.Size = UDim2.new(1, -50, 0, 20)
+    descLabel.Position = UDim2.new(0, 0, 0, 25)
+    descLabel.BackgroundTransparency = 1
+    descLabel.Text = desc
+    descLabel.TextColor3 = Color3.fromRGB(150, 150, 180)
+    descLabel.TextSize = 12
+    descLabel.Font = Enum.Font.Gotham
+    descLabel.TextXAlignment = Enum.TextXAlignment.Left
+    descLabel.TextTransparency = 0.5
+    descLabel.Parent = toggleFrame
+    
+    local toggleBtn = Instance.new("Frame")
+    toggleBtn.Size = UDim2.new(0, 44, 0, 24)
+    toggleBtn.Position = UDim2.new(1, -54, 0, 8)
+    toggleBtn.BackgroundColor3 = default and Color3.fromRGB(70, 130, 255) or Color3.fromRGB(60, 60, 80)
+    toggleBtn.BackgroundTransparency = 0.2
+    toggleBtn.BorderSizePixel = 0
+    toggleBtn.Parent = toggleFrame
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 12)
+    toggleCorner.Parent = toggleBtn
+    
+    local circle = Instance.new("Frame")
+    circle.Size = UDim2.new(0, 18, 0, 18)
+    circle.Position = default and UDim2.new(1, -22, 0, 3) or UDim2.new(0, 4, 0, 3)
+    circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    circle.BackgroundTransparency = 0.3
+    circle.BorderSizePixel = 0
+    circle.Parent = toggleBtn
+    
+    local circleCorner = Instance.new("UICorner")
+    circleCorner.CornerRadius = UDim.new(0, 9)
+    circleCorner.Parent = circle
+    
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, 0, 1, 0)
+    button.Position = UDim2.new(0, 0, 0, 0)
+    button.BackgroundTransparency = 1
+    button.Text = ""
+    button.Parent = toggleBtn
+    
+    return button, toggleBtn, circle
+end
+
+local function createButton(parent, text, yPos, color, desc)
+    local btnFrame = Instance.new("Frame")
+    btnFrame.Size = UDim2.new(1, 0, 0, 50)
+    btnFrame.Position = UDim2.new(0, 0, 0, yPos)
+    btnFrame.BackgroundTransparency = 1
+    btnFrame.Parent = parent
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 25)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(220, 220, 240)
+    label.TextSize = 14
+    label.Font = Enum.Font.GothamSemibold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = btnFrame
+    
+    local descLabel = Instance.new("TextLabel")
+    descLabel.Size = UDim2.new(1, 0, 0, 20)
+    descLabel.Position = UDim2.new(0, 0, 0, 25)
+    descLabel.BackgroundTransparency = 1
+    descLabel.Text = desc
+    descLabel.TextColor3 = Color3.fromRGB(150, 150, 180)
+    descLabel.TextSize = 12
+    descLabel.Font = Enum.Font.Gotham
+    descLabel.TextXAlignment = Enum.TextXAlignment.Left
+    descLabel.TextTransparency = 0.5
+    descLabel.Parent = btnFrame
+    
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 80, 0, 30)
+    btn.Position = UDim2.new(1, -90, 0, 10)
+    btn.BackgroundColor3 = color or Color3.fromRGB(70, 130, 255)
+    btn.BackgroundTransparency = 0.2
+    btn.BorderSizePixel = 0
+    btn.Text = "Teleport"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 13
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = btnFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
+    
+    return btn
+end
+
+-- ===== CREATE MAIN TAB CONTENT =====
+local mainContent = Instance.new("Frame")
+mainContent.Size = UDim2.new(1, 0, 1, 0)
+mainContent.BackgroundTransparency = 1
+mainContent.Parent = scrollFrame
+
+local yOffset = 0
+
+-- ESP Section
+local espSection = Instance.new("TextLabel")
+espSection.Size = UDim2.new(1, 0, 0, 30)
+espSection.Position = UDim2.new(0, 0, 0, yOffset)
+espSection.BackgroundTransparency = 1
+espSection.Text = "ESP Settings"
+espSection.TextColor3 = Color3.fromRGB(180, 180, 220)
+espSection.TextSize = 14
+espSection.Font = Enum.Font.GothamBold
+espSection.TextXAlignment = Enum.TextXAlignment.Left
+espSection.Parent = mainContent
+yOffset = yOffset + 35
+
+-- ESP Villain
+local espVillainBtn, espVillainToggle, espVillainCircle = createToggle(mainContent, "ESP Villain", yOffset, settings.espVillain, "Enable/Disable ESP for Villain team")
+yOffset = yOffset + 65
+
+-- ESP Survivors
+local espSurvivorBtn, espSurvivorToggle, espSurvivorCircle = createToggle(mainContent, "ESP Survivors", yOffset, settings.espSurvivors, "Enable/Disable ESP for Survivors team")
+yOffset = yOffset + 65
+
+-- ESP Lobby
+local espLobbyBtn, espLobbyToggle, espLobbyCircle = createToggle(mainContent, "ESP Lobby", yOffset, settings.espLobby, "Enable/Disable ESP for Lobby team")
+yOffset = yOffset + 65
+
+-- Aimbot Section
+local aimbotSection = Instance.new("TextLabel")
+aimbotSection.Size = UDim2.new(1, 0, 0, 30)
+aimbotSection.Position = UDim2.new(0, 0, 0, yOffset)
+aimbotSection.BackgroundTransparency = 1
+aimbotSection.Text = "Aimbot Settings"
+aimbotSection.TextColor3 = Color3.fromRGB(180, 180, 220)
+aimbotSection.TextSize = 14
+aimbotSection.Font = Enum.Font.GothamBold
+aimbotSection.TextXAlignment = Enum.TextXAlignment.Left
+aimbotSection.Parent = mainContent
+yOffset = yOffset + 35
+
+-- Aimbot Villain
+local aimbotVillainBtn, aimbotVillainToggle, aimbotVillainCircle = createToggle(mainContent, "Aimbot Villain", yOffset, settings.aimbotVillain, "Enable/Disable auto-aim for Villain team")
+yOffset = yOffset + 65
+
+-- Aimbot Survivors
+local aimbotSurvivorBtn, aimbotSurvivorToggle, aimbotSurvivorCircle = createToggle(mainContent, "Aimbot Survivors", yOffset, settings.aimbotSurvivors, "Enable/Disable auto-aim for Survivors team")
+yOffset = yOffset + 65
+
+-- Smoothness
+local smoothSection = Instance.new("TextLabel")
+smoothSection.Size = UDim2.new(1, 0, 0, 30)
+smoothSection.Position = UDim2.new(0, 0, 0, yOffset)
+smoothSection.BackgroundTransparency = 1
+smoothSection.Text = "Aimbot Smoothness"
+smoothSection.TextColor3 = Color3.fromRGB(180, 180, 220)
+smoothSection.TextSize = 14
+smoothSection.Font = Enum.Font.GothamBold
+smoothSection.TextXAlignment = Enum.TextXAlignment.Left
+smoothSection.Parent = mainContent
+yOffset = yOffset + 35
+
+local smoothFrame = Instance.new("Frame")
+smoothFrame.Size = UDim2.new(1, 0, 0, 30)
+smoothFrame.Position = UDim2.new(0, 0, 0, yOffset)
+smoothFrame.BackgroundTransparency = 1
+smoothFrame.Parent = mainContent
+
+local smoothLabel = Instance.new("TextLabel")
+smoothLabel.Size = UDim2.new(1, 0, 1, 0)
+smoothLabel.BackgroundTransparency = 1
+smoothLabel.Text = "Smoothness: " .. settings.aimbotSmoothness
+smoothLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+smoothLabel.TextSize = 13
+smoothLabel.Font = Enum.Font.Gotham
+smoothLabel.TextXAlignment = Enum.TextXAlignment.Left
+smoothLabel.Parent = smoothFrame
+yOffset = yOffset + 40
+
+-- Teleport Section
+local teleportSection = Instance.new("TextLabel")
+teleportSection.Size = UDim2.new(1, 0, 0, 30)
+teleportSection.Position = UDim2.new(0, 0, 0, yOffset)
+teleportSection.BackgroundTransparency = 1
+teleportSection.Text = "Teleport Crate"
+teleportSection.TextColor3 = Color3.fromRGB(180, 180, 220)
+teleportSection.TextSize = 14
+teleportSection.Font = Enum.Font.GothamBold
+teleportSection.TextXAlignment = Enum.TextXAlignment.Left
+teleportSection.Parent = mainContent
+yOffset = yOffset + 35
+
+-- Teleport Crate Button
+local teleportBtn = createButton(mainContent, "Teleport to Crate", yOffset, Color3.fromRGB(255, 170, 50), "Teleport to the nearest crate in game")
+yOffset = yOffset + 60
+
+-- Update canvas size
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + 50)
+
+-- ===== CREATE INFO TAB CONTENT =====
+local infoContent = Instance.new("Frame")
+infoContent.Size = UDim2.new(1, 0, 1, 0)
+infoContent.BackgroundTransparency = 1
+infoContent.Visible = false
+infoContent.Parent = scrollFrame
+
+local infoText = Instance.new("TextLabel")
+infoText.Size = UDim2.new(1, 0, 0, 250)
+infoText.Position = UDim2.new(0, 0, 0, 20)
+infoText.BackgroundTransparency = 1
+infoText.Text = "NNVN Hub\n\nVersion: 1.0\nCreator: NNVN\nGame: Hide From The Villain\n\nFeatures:\n• ESP for 3 teams\n• Aimbot with smoothness control\n• Teleport to crate\n• Clean UI\n\nPress K or Click Logo to toggle menu"
+infoText.TextColor3 = Color3.fromRGB(200, 200, 220)
+infoText.TextSize = 14
+infoText.Font = Enum.Font.Gotham
+infoText.TextXAlignment = Enum.TextXAlignment.Center
+infoText.TextYAlignment = Enum.TextYAlignment.Top
+infoText.LineHeight = 1.5
+infoText.Parent = infoContent
+
+-- ===== TAB SWITCHING =====
+local function switchTab(tab)
+    settings.currentTab = tab
+    
+    if tab == "Main" then
+        mainContent.Visible = true
+        infoContent.Visible = false
+        mainTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        infoTab.TextColor3 = Color3.fromRGB(150, 150, 180)
+        mainIndicator.BackgroundTransparency = 0
+        infoIndicator.BackgroundTransparency = 1
+    else
+        mainContent.Visible = false
+        infoContent.Visible = true
+        mainTab.TextColor3 = Color3.fromRGB(150, 150, 180)
+        infoTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        mainIndicator.BackgroundTransparency = 1
+        infoIndicator.BackgroundTransparency = 0
+    end
+end
+
+mainTab.MouseButton1Click:Connect(function()
+    switchTab("Main")
+end)
+
+infoTab.MouseButton1Click:Connect(function()
+    switchTab("Info")
+end)
+
+-- ===== TOGGLE FUNCTIONS =====
+local function toggleSwitch(btn, toggle, circle, setting, color)
+    settings[setting] = not settings[setting]
+    if settings[setting] then
+        toggle.BackgroundColor3 = color or Color3.fromRGB(70, 130, 255)
+        circle.Position = UDim2.new(1, -22, 0, 3)
+    else
+        toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+        circle.Position = UDim2.new(0, 4, 0, 3)
+    end
+    updateESPVisibility()
+end
+
+-- ===== TELEPORT CRATE FUNCTION =====
+local function teleportToCrate()
+    if not LocalPlayer.Character then 
+        print("❌ Không có nhân vật!")
+        return 
+    end
+    
+    local humanoidRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then 
+        print("❌ Không tìm thấy HumanoidRootPart!")
+        return 
+    end
+    
+    -- Tìm tất cả crate trong workspace
+    local crates = {}
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj.Name and string.lower(obj.Name):find("crate") then
+            table.insert(crates, obj)
+        elseif obj:IsA("Part") and obj.Name and string.lower(obj.Name):find("crate") then
+            table.insert(crates, obj)
+        elseif obj:IsA("BasePart") and obj.Parent and obj.Parent.Name and string.lower(obj.Parent.Name):find("crate") then
+            table.insert(crates, obj)
+        end
+    end
+    
+    if #crates == 0 then
+        -- Thử tìm theo tên khác
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name and (
+                string.lower(obj.Name):find("chest") or 
+                string.lower(obj.Name):find("box") or
+                string.lower(obj.Name):find("supply") or
+                string.lower(obj.Name):find("loot")
+            ) then
+                table.insert(crates, obj)
+            end
+        end
+    end
+    
+    if #crates == 0 then
+        print("❌ Không tìm thấy crate nào trong game!")
+        return
+    end
+    
+    -- Tìm crate gần nhất
+    local nearestCrate = nil
+    local nearestDist = math.huge
+    local playerPos = humanoidRootPart.Position
+    
+    for _, crate in ipairs(crates) do
+        local cratePos
+        if crate:IsA("BasePart") then
+            cratePos = crate.Position
+        elseif crate:IsA("Model") then
+            local primary = crate.PrimaryPart or crate:FindFirstChildWhichIsA("BasePart")
+            if primary then
+                cratePos = primary.Position
+            end
+        end
+        
+        if cratePos then
+            local dist = (cratePos - playerPos).Magnitude
+            if dist < nearestDist then
+                nearestDist = dist
+                nearestCrate = crate
+            end
+        end
+    end
+    
+    if not nearestCrate then
+        print("❌ Không tìm thấy crate hợp lệ!")
+        return
+    end
+    
+    -- Lấy vị trí của crate
+    local targetPos
+    if nearestCrate:IsA("BasePart") then
+        targetPos = nearestCrate.Position
+    elseif nearestCrate:IsA("Model") then
+        local primary = nearestCrate.PrimaryPart or nearestCrate:FindFirstChildWhichIsA("BasePart")
+        if primary then
+            targetPos = primary.Position
+        end
+    end
+    
+    if not targetPos then
+        print("❌ Không thể xác định vị trí crate!")
+        return
+    end
+    
+    -- Teleport với animation
+    local startPos = humanoidRootPart.Position
+    local distance = (targetPos - startPos).Magnitude
+    
+    if distance < 5 then
+        print("⚠️ Bạn đã ở gần crate!")
+        return
+    end
+    
+    print("🔄 Đang teleport đến crate...")
+    
+    -- Tạo hiệu ứng teleport
+    local tweenInfo = TweenInfo.new(
+        0.3,
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.Out
+    )
+    
+    -- Teleport lên cao 1 chút rồi xuống
+    local midPos = Vector3.new(targetPos.X, targetPos.Y + 10, targetPos.Z)
+    local tween1 = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(midPos)})
+    local tween2 = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+    
+    tween1:Play()
+    tween1.Completed:Connect(function()
+        tween2:Play()
+    end)
+    
+    print("✅ Đã teleport đến crate!")
+    print("📦 Khoảng cách: " .. math.floor(distance) .. " units")
+end
+
+-- ===== TOGGLE MENU FUNCTION =====
+local function toggleMenu()
+    settings.menuOpen = not settings.menuOpen
+    mainContainer.Visible = settings.menuOpen
+    
+    -- Animation cho logo khi menu đóng/mở
+    if settings.menuOpen then
+        logoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+        logoFrame.BackgroundTransparency = 0.1
+    else
+        logoFrame.BackgroundColor3 = Color3.fromRGB(150, 100, 255)
+        logoFrame.BackgroundTransparency = 0.2
+    end
+end
+
+-- ===== EVENTS =====
+-- Logo Click
+logoBtn.MouseButton1Click:Connect(function()
+    toggleMenu()
+end)
+
+-- Logo hover effect
+logoBtn.MouseEnter:Connect(function()
+    TweenService:Create(logoFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 0.2,
+        Size = UDim2.new(0, 65, 0, 65)
+    }):Play()
+end)
+
+logoBtn.MouseLeave:Connect(function()
+    TweenService:Create(logoFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 0.1,
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+end)
+
+-- ESP Toggles
+espVillainBtn.MouseButton1Click:Connect(function()
+    toggleSwitch(espVillainBtn, espVillainToggle, espVillainCircle, "espVillain", Color3.fromRGB(200, 50, 50))
+end)
+
+espSurvivorBtn.MouseButton1Click:Connect(function()
+    toggleSwitch(espSurvivorBtn, espSurvivorToggle, espSurvivorCircle, "espSurvivors", Color3.fromRGB(50, 200, 50))
+end)
+
+espLobbyBtn.MouseButton1Click:Connect(function()
+    toggleSwitch(espLobbyBtn, espLobbyToggle, espLobbyCircle, "espLobby", Color3.fromRGB(150, 150, 150))
+end)
+
+aimbotVillainBtn.MouseButton1Click:Connect(function()
+    toggleSwitch(aimbotVillainBtn, aimbotVillainToggle, aimbotVillainCircle, "aimbotVillain", Color3.fromRGB(200, 50, 50))
+end)
+
+aimbotSurvivorBtn.MouseButton1Click:Connect(function()
+    toggleSwitch(aimbotSurvivorBtn, aimbotSurvivorToggle, aimbotSurvivorCircle, "aimbotSurvivors", Color3.fromRGB(50, 200, 50))
+end)
+
+-- Teleport button
+teleportBtn.MouseButton1Click:Connect(function()
+    teleportToCrate()
+end)
+
+-- ===== PHÍM TẮT K =====
+-- Dùng ContextActionService
+ContextActionService:BindAction("ToggleMenu", function(actionName, inputState, inputObject)
+    if inputState == Enum.UserInputState.Begin then
+        toggleMenu()
+    end
+end, false, Enum.KeyCode.K)
+
+-- Dùng UserInputService dự phòng
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.K then
+        toggleMenu()
+    end
+end)
+
+-- ===== ESP FUNCTIONS =====
+local function getTeamColor(player)
+    if not player.Team then return Color3.fromRGB(128, 128, 128) end
+    
+    local teamName = player.Team.Name
+    if teamName == "Villain" then
+        return Color3.fromRGB(255, 0, 0)
+    elseif teamName == "Survivors" then
+        return Color3.fromRGB(0, 255, 0)
+    elseif teamName == "Lobby" then
+        return Color3.fromRGB(128, 128, 128)
+    else
+        return Color3.fromRGB(128, 128, 128)
+    end
+end
+
+local function updateESPVisibility()
+    for _, player in Players:GetPlayers() do
+        if player ~= LocalPlayer and player.Character then
+            local highlight = player.Character:FindFirstChild("ESP_Highlight")
+            local head = player.Character:FindFirstChild("Head")
+            local billboard = head and head:FindFirstChild("ESP_Name")
+            
+            if highlight and billboard then
+                local teamName = player.Team and player.Team.Name or ""
+                local visible = false
+                
+                if teamName == "Villain" and settings.espVillain then
+                    visible = true
+                elseif teamName == "Survivors" and settings.espSurvivors then
+                    visible = true
+                elseif teamName == "Lobby" and settings.espLobby then
+                    visible = true
+                end
+                
+                highlight.Enabled = visible
+                billboard.Enabled = visible
+            end
+        end
+    end
+end
+
+local function createESP(player)
+    if player == LocalPlayer then return end
+    if not player.Character then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.Adornee = player.Character
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_Name"
+    billboard.Adornee = player.Character:FindFirstChild("Head")
+    billboard.Size = UDim2.new(0, 200, 0, 40)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = false
+    textLabel.TextSize = 14
+    textLabel.Font = Enum.Font.SourceSansLight
+    textLabel.TextStrokeTransparency = 0.3
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    textLabel.TextXAlignment = Enum.TextXAlignment.Center
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Parent = billboard
+
+    highlight.Parent = player.Character
+    billboard.Parent = player.Character:FindFirstChild("Head")
+    
+    return highlight, billboard
+end
+
+local function updateESPColor(player)
+    if not player.Character then return end
+    
+    local highlight = player.Character:FindFirstChild("ESP_Highlight")
+    local head = player.Character:FindFirstChild("Head")
+    local billboard = head and head:FindFirstChild("ESP_Name")
+    
+    if not highlight or not billboard then return end
+
+    local color = getTeamColor(player)
+    local teamName = player.Team and player.Team.Name or "Unknown"
+    
+    local shortTeam = ""
+    if teamName == "Villain" then
+        shortTeam = "VL"
+    elseif teamName == "Survivors" then
+        shortTeam = "SV"
+    elseif teamName == "Lobby" then
+        shortTeam = "LB"
+    else
+        shortTeam = "??"
+    end
+
+    highlight.FillColor = color
+    highlight.OutlineColor = color
+
+    local textLabel = billboard:FindFirstChildOfClass("TextLabel")
+    if textLabel then
+        textLabel.TextColor3 = color
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = math.floor((player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
+            textLabel.Text = player.Name .. " [" .. shortTeam .. "] " .. dist .. "m"
+        else
+            textLabel.Text = player.Name .. " [" .. shortTeam .. "]"
+        end
+    end
+    
+    local visible = false
+    if teamName == "Villain" and settings.espVillain then
+        visible = true
+    elseif teamName == "Survivors" and settings.espSurvivors then
+        visible = true
+    elseif teamName == "Lobby" and settings.espLobby then
+        visible = true
+    end
+    
+    highlight.Enabled = visible
+    billboard.Enabled = visible
+end
+
+local function removeESP(player)
+    if player.Character then
+        local highlight = player.Character:FindFirstChild("ESP_Highlight")
+        if highlight then highlight:Destroy() end
+
+        local head = player.Character:FindFirstChild("Head")
+        if head then
+            local billboard = head:FindFirstChild("ESP_Name")
+            if billboard then billboard:Destroy() end
+        end
+    end
+end
+
+-- ===== AIMBOT =====
+local function getAimbotTarget()
+    local closestTarget = nil
+    local closestDistance = 150
+    
+    if not LocalPlayer.Character then return nil end
+    local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return nil end
+    
+    for _, player in Players:GetPlayers() do
+        if player == LocalPlayer then continue end
+        if not player.Character then continue end
+        
+        local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+        local head = player.Character:FindFirstChild("Head")
+        if not targetRoot or not head then continue end
+        
+        local teamName = player.Team and player.Team.Name or ""
+        local canAim = false
+        
+        if teamName == "Villain" and settings.aimbotVillain then
+            canAim = true
+        elseif teamName == "Survivors" and settings.aimbotSurvivors then
+            canAim = true
+        end
+        
+        if not canAim then continue end
+        
+        local pos, onScreen = Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
+        if not onScreen then continue end
+        
+        local screenCenter = Vector2.new(Workspace.CurrentCamera.ViewportSize.X / 2, Workspace.CurrentCamera.ViewportSize.Y / 2)
+        local distance = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
+        
+        if distance < closestDistance then
+            closestDistance = distance
+            closestTarget = head
+        end
+    end
+    
+    return closestTarget
+end
+
+RunService.Heartbeat:Connect(function()
+    if not settings.aimbotVillain and not settings.aimbotSurvivors then return end
+    if not LocalPlayer.Character then return end
+    
+    local target = getAimbotTarget()
+    if target then
+        local camera = Workspace.CurrentCamera
+        local targetPos = target.Position
+        local currentPos = camera.CFrame.Position
+        
+        local direction = (targetPos - currentPos).Unit
+        local newCFrame = CFrame.lookAt(currentPos, currentPos + direction)
+        
+        local smoothFactor = settings.aimbotSmoothness
+        camera.CFrame = camera.CFrame:Lerp(newCFrame, smoothFactor)
+    end
+end)
+
+-- ===== PLAYER EVENTS =====
+local function onCharacterAdded(player, character)
+    task.wait(0.5)
+    createESP(player)
+    updateESPColor(player)
+end
+
+for _, player in Players:GetPlayers() do
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function(character)
+            onCharacterAdded(player, character)
+        end)
+
+        if player.Character then
+            onCharacterAdded(player, player.Character)
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function(character)
+            onCharacterAdded(player, character)
+        end)
+        
+        player:GetPropertyChangedSignal("Team"):Connect(function()
+            if player.Character then
+                updateESPColor(player)
+            end
+        end)
+    end
+end)
+
+for _, player in Players:GetPlayers() do
+    if player ~= LocalPlayer then
+        player:GetPropertyChangedSignal("Team"):Connect(function()
+            if player.Character then
+                updateESPColor(player)
+            end
+        end)
+    end
+end
+
+Players.PlayerRemoving:Connect(removeESP)
+
+RunService.Heartbeat:Connect(function()
+    for _, player in Players:GetPlayers() do
+        if player ~= LocalPlayer and player.Character then
+            updateESPColor(player)
+        end
+    end
+end)
+
+print("✅ NNVN Hub | Hide From The Villain ĐÃ CHẠY!")
+print("🔴 Villain = MÀU ĐỎ + AIMBOT")
+print("🟢 Survivors = MÀU XANH + AIMBOT")
+print("⚪ Lobby = MÀU XÁM")
+print("📦 Teleport Crate = Nhấn nút trong menu")
+print("📌 Phím K hoặc Click Logo NN để mở/tắt menu")
+print(ProtectionConfig.HubName .. " Loaded Successfully!")
